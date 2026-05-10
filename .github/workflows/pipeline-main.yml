@@ -37,7 +37,7 @@ jobs:
           sed -i "s/version = '${CURRENT_VERSION}'/version = '${NEW_VERSION}'/" build.gradle
 
           echo "Committing bump version to git"
-          git config --global user.name "github-actions[bot]"
+          git config --global user.name "riccardorasera95@gmail.com"
           git add build.gradle
           git commit -m "Bump version to ${NEW_VERSION}"
           git push
