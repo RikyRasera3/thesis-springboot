@@ -13,5 +13,9 @@ services:
       DB_PASSWORD: postgres
       DB_HOST: postgres
       DB_PORT: 5432
+      JAVA_TOOL_OPTIONS: >-
+        -XX:+UseContainerSupport
+        -XX:MaxRAMPercentage=75.0
+        -XX:+ExitOnOutOfMemoryError
     ports:
       - "8080:8080"

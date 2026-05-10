@@ -8,3 +8,16 @@ spring:
         dialect: "org.hibernate.dialect.PostgreSQLDialect"
         default_schema: thesis
         show_sql: false
+  datasource:
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  tomcat:
+    threads:
+      max: 50
+      min-spare: 5
