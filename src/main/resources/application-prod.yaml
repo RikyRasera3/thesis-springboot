@@ -6,3 +6,7 @@ spring:
 
 logs:
   enabled: ${LOGS_ENABLED:false}
+
+logging:
+  level:
+    com.google.cloud.sql: DEBUG
