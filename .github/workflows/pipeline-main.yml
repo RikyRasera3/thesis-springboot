@@ -23,25 +23,12 @@ jobs:
         id: checkout
         uses: actions/checkout@v6
 
-      - name: Bump patch version
-        id: bump-version
+      - name: Get Repository Version
+        id: get-version
         run: |-
-          CURRENT_VERSION=$(grep "version = " build.gradle | sed -E "s/.*version = '([^']+)'.*/\1/")
-          echo "Current version: ${CURRENT_VERSION}"
-
-          IFS='.' read -r MAJOR MINOR PATCH <<< "${CURRENT_VERSION}"
-          PATCH=$((${PATCH} + 1))
-          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
-          echo "New version: ${NEW_VERSION}"
-          echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
-          sed -i "s/version = '${CURRENT_VERSION}'/version = '${NEW_VERSION}'/" build.gradle
-
-          echo "Committing bump version to git"
-          git config --global user.name "riccardorasera95@gmail.com"
-          git add build.gradle
-          git commit -m "Bump version to ${NEW_VERSION}"
-          git push
-          echo "Bump version pushed to repository successfully"
+          VERSION=$(grep "version = " build.gradle | sed -E "s/.*version = '([^']+)'.*/\1/")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version read from build.gradle: $VERSION"
 
       - name: Authenticate to Google Cloud
         id: auth-gcloud
