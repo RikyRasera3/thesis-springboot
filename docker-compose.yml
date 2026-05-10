@@ -1,0 +1,17 @@
+name: thesis-springboot
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: thesis-springboot-app
+    container_name: thesis-springboot-app
+    environment:
+      DB_NAME: postgres
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: postgres
+      DB_PORT: 5432
+    ports:
+      - "8080:8080"

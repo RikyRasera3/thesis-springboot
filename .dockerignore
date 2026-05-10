@@ -1,0 +1,16 @@
+.git
+.github
+.gradle/
+.idea/
+build/
+database/
+grafana/
+src/main/resources/application-custom.yaml
+src/main/resources/application-local.yaml
+src/test/
+.gcloudignore
+.gitattributes
+.gitignore
+Dockerfile
+docker-compose.yml
+README.md
