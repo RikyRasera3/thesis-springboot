@@ -24,8 +24,11 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
 
     @NonNull
     @Override
-    @EntityGraph(attributePaths = {"accountRoles", "accountRoles.role"})
     Page<Account> findAll(@NonNull Specification<Account> spec, @NonNull Pageable pageable);
+
+    @Query("SELECT a FROM Account a WHERE a.id IN :ids")
+    @EntityGraph(attributePaths = {"accountRoles", "accountRoles.role"})
+    List<Account> findAllByIdWithRoles(@Param("ids") List<Long> ids);
 
     @NonNull
     @Override
