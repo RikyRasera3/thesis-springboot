@@ -59,7 +59,7 @@ sudo apt install k6 -y
 Simulates realistic average traffic with 50 VUs, validating both p95 and p99 latency thresholds.
 
 ```bash
-BASE_URL=http://127.0.0.1:3000 \
+BASE_URL=http://127.0.0.1:8080 \
 k6 run grafana/scenarios/average.js --out json=grafana/results/average.json
 ```
 
@@ -68,7 +68,7 @@ k6 run grafana/scenarios/average.js --out json=grafana/results/average.json
 Runs 100 VUs to validate that 95% of requests complete within the defined SLA (500ms).
 
 ```bash
-BASE_URL=http://127.0.0.1:3000 \
+BASE_URL=http://127.0.0.1:8080 \
 k6 run grafana/scenarios/p95.js --out json=grafana/results/p95.json
 ```
 
@@ -77,7 +77,7 @@ k6 run grafana/scenarios/p95.js --out json=grafana/results/p95.json
 Runs 100 VUs to validate tail latency, ensuring 99% of requests complete within 1000ms.
 
 ```bash
-BASE_URL=http://127.0.0.1:3000 \
+BASE_URL=http://127.0.0.1:8080 \
 k6 run grafana/scenarios/p99.js --out json=grafana/results/p99.json
 ```
 
@@ -86,7 +86,7 @@ k6 run grafana/scenarios/p99.js --out json=grafana/results/p99.json
 Ramps up to 1000 VUs to find the application breaking point.
 
 ```bash
-BASE_URL=http://127.0.0.1:3000 \
+BASE_URL=http://127.0.0.1:8080 \
 k6 run grafana/scenarios/stress.js --out json=grafana/results/stress.json
 ```
 
@@ -95,7 +95,7 @@ k6 run grafana/scenarios/stress.js --out json=grafana/results/stress.json
 Simulates a sudden burst of 500 VUs to test resilience and recovery.
 
 ```bash
-BASE_URL=http://127.0.0.1:3000 \
+BASE_URL=http://127.0.0.1:8080 \
 k6 run grafana/scenarios/spike.js --out json=grafana/results/spike.json
 ```
 
@@ -104,6 +104,6 @@ k6 run grafana/scenarios/spike.js --out json=grafana/results/spike.json
 Runs 50 VUs for 30 minutes to detect memory leaks and performance degradation over time.
 
 ```bash
-BASE_URL=http://127.0.0.1:3000 \
+BASE_URL=http://127.0.0.1:8080 \
 k6 run grafana/scenarios/soak.js --out json=grafana/results/soak.json
 ```

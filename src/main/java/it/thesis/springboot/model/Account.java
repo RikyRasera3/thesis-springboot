@@ -41,6 +41,6 @@ public class Account extends BaseModel {
     @Column(name = "date_of_birth", nullable = false)
     private LocalDate dateOfBirth;
 
-    @OneToMany(mappedBy = "account", fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<AccountRole> accountRoles;
 }

@@ -10,12 +10,15 @@ import it.thesis.springboot.repository.AccountRepository;
 import it.thesis.springboot.service.specification.AccountSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -61,7 +64,23 @@ public class AccountService {
     }
 
     public Page<Account> findAll(Pageable pageable, SearchAccountCriteria criteria) {
-        return repository.findAll(specification.getFilters(criteria), pageable);
+        // Phase 1: paginate at SQL level (no collection fetch → no in-memory warning)
+        Page<Account> page = repository.findAll(specification.getFilters(criteria), pageable);
+
+        if (page.isEmpty()) {
+            return page;
+        }
+
+        // Phase 2: fetch collections for the paged IDs (mirrors Node.js findAllPaged include)
+        List<Long> ids = page.getContent().stream().map(Account::getId).toList();
+        Map<Long, Account> accountsWithRoles = repository.findAllByIdWithRoles(ids).stream()
+                .collect(Collectors.toMap(Account::getId, a -> a));
+
+        List<Account> enrichedContent = page.getContent().stream()
+                .map(a -> accountsWithRoles.getOrDefault(a.getId(), a))
+                .toList();
+
+        return new PageImpl<>(enrichedContent, pageable, page.getTotalElements());
     }
 
     public List<Account> findAll(SearchAccountCriteria criteria) {
