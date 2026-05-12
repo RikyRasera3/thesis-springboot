@@ -35,6 +35,9 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
     Optional<Account> findById(@NonNull Long id);
 
     @Query("SELECT a FROM Account a WHERE a.id = :id")
+    Optional<Account> findByIdWithoutRoles(@NonNull @Param("id") Long id);
+
+    @Query("SELECT a FROM Account a WHERE a.id = :id")
     @EntityGraph(attributePaths = {"accountRoles", "accountRoles.role"})
     Optional<Account> findByIdWithRoles(@NonNull @Param("id") Long id);
 }

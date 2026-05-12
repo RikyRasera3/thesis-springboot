@@ -35,7 +35,7 @@ public class AccountService {
         List<Role> roles = roleService.findAllByRoleIds(dto.getRoleIds());
 
         Account account = AccountFactory.updateAccount(dto);
-        repository.save(account);
+        account = repository.save(account);
 
         accountRoleService.insert(account, roles);
 
@@ -44,7 +44,7 @@ public class AccountService {
 
     @Transactional
     public void updateAccount(Long id, UpdateAccountDto dto) {
-        Account account = findByIdOrError(id);
+        Account account = findByIdWithoutRolesOrError(id);
 
         if(dto.getRoleIds().isPresent()) {
             List<Role> roles = roleService.findAllByRoleIds(dto.getRoleIds().get());
@@ -58,7 +58,7 @@ public class AccountService {
 
     @Transactional
     public void deleteAccount(Long id) {
-        findByIdOrError(id);
+        findByIdWithoutRolesOrError(id);
         accountRoleService.deleteByAccountId(id);
         repository.deleteById(id);
     }
@@ -92,7 +92,11 @@ public class AccountService {
         return repository.findByIdWithRoles(id);
     }
 
-    public Account findByIdOrError(Long id) {
-        return findById(id).orElseThrow(() -> new IllegalArgumentException("Account with id " + id + " not found"));
+    public Optional<Account> findByIdWithoutRoles(Long id) {
+        return repository.findByIdWithoutRoles(id);
+    }
+
+    public Account findByIdWithoutRolesOrError(Long id) {
+        return findByIdWithoutRoles(id).orElseThrow(() -> new IllegalArgumentException("Account with id " + id + " not found"));
     }
 }
