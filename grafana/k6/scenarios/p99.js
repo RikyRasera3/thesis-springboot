@@ -1,17 +1,20 @@
 import {sleep} from "k6";
-import {createAccount, deleteAccount, getAccountById, patchAccount, searchAccounts} from "../requests/accounts.js";
+import {searchAccounts, getAccountById, createAccount, deleteAccount, patchAccount} from "../requests/accounts.js";
 import {randomAccountPayload} from "../utils/dtoHelpers.js";
 
 export const options = {
     stages: [
-        {duration: "1m", target: 10},
-        {duration: "30s", target: 500},
-        {duration: "1m", target: 10},
-        {duration: "30s", target: 0}
+        {duration: "2m", target: 100},
+        {duration: "5m", target: 100},
+        {duration: "2m", target: 0}
     ],
     thresholds: {
-        http_req_duration: ["p(95)<2000"],
-        http_req_failed: ["rate<0.05"]
+        http_req_duration: ["p(99)<1000"],
+        http_req_failed: ["rate<0.01"]
+   },
+    tags: {
+        project: "springboot",
+        scenario: "p99"
     }
 };
 

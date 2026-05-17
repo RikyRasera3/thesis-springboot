@@ -14,7 +14,11 @@ export const options = {
             "p(99)<1000"
         ],
         http_req_failed: ["rate<0.01"]
-   }
+   },
+    tags: {
+        project: "springboot",
+        scenario: "average"
+    }
 };
 
 export default function () {
