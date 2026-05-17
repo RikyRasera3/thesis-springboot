@@ -1,109 +1,172 @@
-# GRAFANA k6
+# Grafana & k6 Load Testing
 
-The tool used for load testing in this project is [k6](https://k6.io/), an open-source load testing tool developed by 
-Grafana Labs. 
-k6 allows users to write test scripts using JavaScript and provides a usefull CLI for executing load tests and analyzing 
-results.
+This guide covers running [k6](https://k6.io/) load tests and visualizing results in [Grafana](https://grafana.com/oss/grafana/) with [InfluxDB](https://www.influxdata.com/)
 
-## Test Environment
+## Table of Contents
 
-Tests have been executed using a  
-[Compute Engine](https://cloud.google.com/products/compute?_gl=1*1mt07sm*_up*MQ..&gclid=CjwKCAjwzLHPBhBTEiwABaLsSnKN_mvr7If9AkAgTHfVeFSFXSuNmwhm30SYU3zVQobJGYhkHR6H4hoCgqEQAvD_BwE&gclsrc=aw.ds)
-VM instance of
-[Google Cloud Platform](https://cloud.google.com/free?utm_source=google&utm_medium=cpc&utm_campaign=Cloud-SS-DR-GCP-1713666-GCP-DR-EMEA-IT-it-Google-BKWS-MIX-na&utm_content=c-Hybrid+%7C+BKWS+-+MIX+%7C+Txt+-+Generic+Cloud-Cloud+Generic-Cloud+Generic-1815140985&utm_term=google+api+key&gclsrc=aw.ds&gad_source=1&gad_campaignid=731154719&gclid=CjwKCAjwzLHPBhBTEiwABaLsSlSRTKU7SJUYNY6CeexT8sOye1Q2soEJzO-dLPyt5bxk_kENWU6nuBoCG8MQAvD_BwE) 
-with the following configurations:
+1. [Running Load Tests](#running-load-tests)
+2. [Grafana & InfluxDB Setup](#grafana--influxdb-setup)
 
-### Configurations
+---
 
-- OS: Ubuntu 22.04 LTS
-- 4 vCPU x86/64 Intel Broadwell
-- 4 GB RAM
-- 10 GB standard persistent disk
+## Running Load Tests
 
-## Installation Guide
-### System Update
+### Prerequisites
 
-```bash
-sudo apt update
-sudo apt upgrade -y
-```
+#### Local Machine
 
-### Install Dependencies
+- **k6** installed ([Installation guide](#local-installation))
+- Application running on `http://127.0.0.1:3000`
 
-```bash
-sudo apt install -y gnupg software-properties-common curl
-```
+#### Google Cloud Platform Compute Engine VM
 
-### Install GPG Key
+- **VM Configuration:**
+  - **OS:** Ubuntu 22.04 LTS
+  - **CPU:** 4 vCPU (Intel Broadwell x86/64)
+  - **Memory:** 4 GB RAM
+  - **Disk:** 10 GB standard persistent disk
+  - **Network:** Firewall rule allowing traffic to the application
+
+### Local Installation
+
+Install k6 on your local machine (Ubuntu/Linux):
 
 ```bash
+# Add GPG Key
 curl -fsSL https://dl.k6.io/key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/k6-archive-keyring.gpg
-```
 
-### Add Grafana k6 Official Repository
-```bash
+# Add Official Repository
 echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
-```
 
-
-### Install k6
-
-```bash
+# Install k6
 sudo apt update
 sudo apt install k6 -y
 ```
 
-## Usage Guide
-### Average Scenario
+### VM Configuration (Google Cloud Compute Engine)
 
-Simulates realistic average traffic with 50 VUs, validating both p95 and p99 latency thresholds.
+1. **Create a VM instance:**
+   - Machine type: 4 vCPUs, 4 GB RAM (e.g., `n1-standard-4`)
+   - OS: Ubuntu 22.04 LTS
+   - Boot disk: 10 GB standard persistent disk
 
-```bash
-BASE_URL=http://127.0.0.1:8080 \
-k6 run grafana/scenarios/average.js --out json=grafana/results/average.json
-```
+2. **SSH into the VM:**
+   ```bash
+   gcloud compute ssh <instance-name> --zone=<zone>
+   ```
 
-### P95 Scenario
+3. **Update and install k6:**
+   ```bash
+   sudo apt update && sudo apt upgrade -y
+   sudo apt install -y gnupg software-properties-common curl
+   
+   curl -fsSL https://dl.k6.io/key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/k6-archive-keyring.gpg
+   echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+   sudo apt update && sudo apt install k6 -y
+   ```
 
-Runs 100 VUs to validate that 95% of requests complete within the defined SLA (500ms).
+4. **Copy test files to VM:**
+   ```bash
+   gcloud compute scp --recurse ./grafana/k6 <instance-name>:~/k6 --zone=<zone>
+   ```
 
-```bash
-BASE_URL=http://127.0.0.1:8080 \
-k6 run grafana/scenarios/p95.js --out json=grafana/results/p95.json
-```
+### Running Tests
 
-### P99 Scenario
+#### On Local Machine
 
-Runs 100 VUs to validate tail latency, ensuring 99% of requests complete within 1000ms.
-
-```bash
-BASE_URL=http://127.0.0.1:8080 \
-k6 run grafana/scenarios/p99.js --out json=grafana/results/p99.json
-```
-
-### Stress Test
-
-Ramps up to 1000 VUs to find the application breaking point.
-
-```bash
-BASE_URL=http://127.0.0.1:8080 \
-k6 run grafana/scenarios/stress.js --out json=grafana/results/stress.json
-```
-
-### Spike Test
-
-Simulates a sudden burst of 500 VUs to test resilience and recovery.
+From the project root, run any scenario:
 
 ```bash
-BASE_URL=http://127.0.0.1:8080 \
-k6 run grafana/scenarios/spike.js --out json=grafana/results/spike.json
+BASE_URL=http://127.0.0.1:3000 \
+k6 run grafana/k6/scenarios/<scenario>.js \
+  --out json=grafana/k6/results/<scenario>.json
 ```
 
-### Soak Test
+**Available scenarios:**
+- `average.js` - 50 VUs, realistic average traffic
+- `p95.js` - 100 VUs, validates p95 latency SLA
+- `p99.js` - 100 VUs, validates p99 tail latency
+- `stress.js` - Ramps to 1000 VUs, find breaking point
+- `spike.js` - 500 VUs spike, test resilience
+- `soak.js` - 50 VUs for 30 minutes, detect memory leaks
 
-Runs 50 VUs for 30 minutes to detect memory leaks and performance degradation over time.
+#### On Google Cloud Compute Engine VM
+
+SSH into the VM and run tests pointing to your deployed application:
 
 ```bash
-BASE_URL=http://127.0.0.1:8080 \
-k6 run grafana/scenarios/soak.js --out json=grafana/results/soak.json
+# Replace <APP_URL> with your application's external IP
+BASE_URL=http://<APP_EXTERNAL_IP>:3000 \
+k6 run ~/k6/scenarios/<scenario>.js \
+  --out json=~/k6/results/<scenario>.json
 ```
+
+**Download results locally:**
+
+```bash
+gcloud compute scp --recurse <instance-name>:~/k6/results ./grafana/k6/ --zone=<zone>
+```
+
+---
+
+## Grafana & InfluxDB Setup
+
+
+### Prerequisites
+
+- **Docker & Docker Compose** installed
+- Ports **8086** (InfluxDB) and **3001** (Grafana) available
+- k6 test results JSON files in `grafana/k6/results/` directory
+
+### Start Services
+
+Navigate to the influxdb directory and start containers:
+
+```bash
+cd grafana/influxdb
+docker-compose up -d
+```
+
+Services will be available at:
+- **Grafana:** `http://localhost:3001`
+- **InfluxDB:** `http://localhost:8086`
+
+### Load Test Results to InfluxDB
+
+After collecting test results, load them into InfluxDB:
+
+```bash
+cd grafana/influxdb
+node loadK6ToInflux.js
+```
+
+This script will:
+- ✅ Auto-discover all `.json` files in `k6/results/`
+- ✅ Parse k6 NDJSON format and extract metrics
+- ✅ Convert to InfluxDB Line Protocol
+- ✅ Load data in batches for optimal performance
+- ✅ Store in the `thesis` database (tagged by `project: springboot` and `scenario: <name>`)
+- ✅ Display real-time progress
+
+### Access Grafana
+
+Open your browser and navigate to:
+```
+http://localhost:3001
+```
+
+**Default credentials:** Admin / Admin (anonymous access enabled)
+
+**Pre-configured Dashboards:**
+
+- **k6 Load Testing Overview** - Overview of all scenarios
+- **k6 Endpoint Analysis** - Performance per API endpoint
+- **Scenario Comparison Dashboards:**
+  - Average Load Test Scenario - Comparison
+  - P95 Load Test Scenario - Comparison
+  - P99 Load Test Scenario - Comparison
+  - Soak Load Test Scenario - Comparison
+  - Spike Load Test Scenario - Comparison
+  - Stress Load Test Scenario - Comparison
+
+Each scenario dashboard shows both **Node.js (Red)** and **Spring Boot (Blue)** results side-by-side for easy comparison.

@@ -3,6 +3,27 @@
 REST backend built with Spring Boot, Java, Spring Web MVC, Spring Data JPA, and PostgreSQL for architectural and functional
 comparison with the [Node.js](https://github.com/RikyRasera3/thesis-nodejs) application.
 
+## Table of Contents
+
+- [Purpose](#purpose)
+- [Technology Stack](#technology-stack)
+- [Prerequisites](#prerequisites)
+- [Available Gradle Tasks](#available-gradle-tasks)
+- [Database Setup](#database-setup)
+- [Docker](#docker)
+- [Project Structure](#project-structure)
+- [Installation & Setup](#installation--setup)
+  - [Run in Development](#run-in-development)
+  - [Build and Run](#build-and-run)
+  - [Run Tests](#run-tests)
+- [API Endpoints](#api-endpoints)
+  - [Quick Service Check](#quick-service-check)
+  - [Server](#server)
+  - [Account](#account)
+- [Payloads and Parameters](#payloads-and-parameters)
+- [Load Testing](#load-testing)
+- [Test Environment](#test-environment)
+
 ## Purpose
 
 The application exposes a set of endpoints for account management and server status checks. Its behavior will remain 
@@ -31,9 +52,9 @@ aligned with the Node.js counterpart so that structure, logic, performance, and 
 - `./gradlew test`: Runs the test suite
 - `./gradlew bootJar`: Builds the executable Spring Boot jar
 
-## Database Notes
+## Database Setup
 
-Refer to the [README.md](database/README.md) file of `database/` folder for database setup
+Refer to the [README.md](database/README.md) file of the `database/` folder for database setup and configuration.
 
 ## Docker
 
@@ -76,7 +97,9 @@ src/
     resources/       Application configuration
 ```
 
-## Run in Development
+## Installation & Setup
+
+### Run in Development
 
 Start the application directly with Gradle:
 
@@ -84,7 +107,7 @@ Start the application directly with Gradle:
 ./gradlew bootRun
 ```
 
-## Build and Run
+### Build and Run
 
 Build the project:
 
@@ -98,13 +121,15 @@ Run the packaged application:
 java -jar build/libs/*.jar
 ```
 
-## Run Tests
+### Run Tests
 
 ```bash
 ./gradlew test
 ```
 
-## Quick Service Check
+## API Endpoints
+
+### Quick Service Check
 
 Health endpoint:
 
@@ -134,8 +159,6 @@ Expected response:
   "message": "pong"
 }
 ```
-
-## Available APIs
 
 ### Server
 
@@ -244,6 +267,13 @@ Example:
 ```bash
 curl -X DELETE http://localhost:8080/accounts/1
 ```
+
+## Load Testing
+
+For load testing with k6, Grafana, and InfluxDB, refer to the [grafana/README.md](../thesis-nodejs/grafana/README.md) for:
+- Running tests locally and on Google Cloud Compute Engine VMs
+- Setting up InfluxDB and Grafana containers
+- Loading k6 results for visualization
 
 ## Test Environment
 
